@@ -4,9 +4,12 @@
   
   </head>
   <body>
-      <canvas />
+      <canvas id="c" width=800 height="600" />
 
-      <script type="application/javascript" src="jquery-1.7.1.js"></script>
-      <script type="application/javascript" src="mandelbrot.js"></script>
+      <script src="jquery-1.7.1.js"></script>
+      <script src="mandelbrot.js"></script>
+      <script>
+          Mandelbrot.draw( $('#c')[0] );
+      </script>
   </body>
 </html>

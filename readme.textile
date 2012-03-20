@@ -1,0 +1,14 @@
+
+h1. Mandelbrot viewer on html5 canvas.
+
+
+h1. Todo
+
+* Make it work
+* show julia set on mouseover in a preview window, switch between Mandelbrot
+  and julia sets easily
+* use web workers with ArrayBuffer to speed it up (http://updates.html5rocks.com/2011/09/Workers-ArrayBuffer)
+* use web workers with Transferable objects to speed it up even more (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
+* profile optimal number of workers
+* 
+
