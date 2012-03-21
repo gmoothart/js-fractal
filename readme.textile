@@ -11,9 +11,8 @@ h1. Todo
 * use web workers with Transferable objects to speed it up even more (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
 * profile optimal number of workers
 * color scheme(s)
-* zooming in
+* zooming in - draw selection rectangle, update view.
 * allow adjusting of iterations (or do it automatically on zoom?)
 * switch to use BigDecimal intelligently when zooming in and numbers become close together
-* draw axes
 * animated transitions??
 * more fractals! 3d fractals?

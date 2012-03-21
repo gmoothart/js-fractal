@@ -9,10 +9,28 @@ Mandelbrot = {};
             minR = -2.5, maxR = 1.5,
             minI = -1.5, maxI = 1.5,
             x,y,r,i,
+            originX, originY,
             iter,
             maxIter = 100,
             ctx = canvasEl.getContext('2d');
 
+        // draw axes
+        // x-axis is the line from (minR,0) to (maxR,0) and
+        // y-axis is the line from (minI,0) to (maxI,0)
+        // We need to map that to pixel coordinates
+        originX = mapComplexCoordToPixel(0, w, minR, maxR);
+        originY = mapComplexCoordToPixel(0, h, minI, maxI);
+
+        ctx.strokeStyle = '#6699ff';
+        ctx.beginPath();
+        ctx.moveTo(0,originY);
+        ctx.lineTo(w,originY); // x-axis
+        ctx.moveTo(originX,0);
+        ctx.lineTo(originX,h); // y-axis
+        ctx.stroke();
+
+        ctx.strokeStyle = '#fff';
+        // draw set
         for(x=0; x<w; x++) {
             r = mapPixelToComplexCoord(x, w, minR, maxR);
 
@@ -56,10 +74,16 @@ Mandelbrot = {};
         return i;
     }
 
-    var mapPixelToComplexCoord = function(p, canvasWidth, minR, maxR)
+    var mapPixelToComplexCoord = function(p, canvasWidth, minC, maxC)
     {
-        var step = Math.abs(maxR - minR) / canvasWidth;
-        return p * step + minR
+        var step = Math.abs(maxC - minC) / canvasWidth;
+        return p * step + minC
+    }
+
+    var mapComplexCoordToPixel = function(c, canvasWidth, minC, maxC)
+    {
+        var step = Math.abs(maxC - minC) / canvasWidth;
+        return (c - minC) / step;
     }
 
 })();
