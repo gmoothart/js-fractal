@@ -1,14 +1,20 @@
 
 h1. Mandelbrot viewer on html5 canvas.
 
+Experimentations with modern browsers, html5, performance, and the beauty of fractals.
 
 h1. Todo
 
 * Make it work
-* show julia set on mouseover in a preview window, switch between Mandelbrot
-  and julia sets easily
+* center initial so there is more Mandelbrot, less white space.
+* show julia set on mouseover in a preview window, switch between Mandelbrot and julia sets easily
 * use web workers with ArrayBuffer to speed it up (http://updates.html5rocks.com/2011/09/Workers-ArrayBuffer)
 * use web workers with Transferable objects to speed it up even more (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
 * profile optimal number of workers
-* 
-
+* color scheme(s)
+* zooming in
+* allow adjusting of iterations (or do it automatically on zoom?)
+* switch to use BigDecimal intelligently when zooming in and numbers become close together
+* draw axes
+* animated transitions??
+* more fractals! 3d fractals?
