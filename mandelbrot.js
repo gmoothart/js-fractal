@@ -6,7 +6,7 @@ Mandelbrot = {};
     Mandelbrot.draw = function(canvasEl) {
         var w = canvasEl.width,
             h = canvasEl.height,
-            minR = -2, maxR = 2,
+            minR = -2.5, maxR = 1.5,
             minI = -1.5, maxI = 1.5,
             x,y,r,i,
             iter,
