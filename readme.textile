@@ -16,3 +16,4 @@ h1. Todo
 * switch to use BigDecimal intelligently when zooming in and numbers become close together
 * animated transitions??
 * more fractals! 3d fractals?
+* use pushState() to track zoom level and allow history navigation.
