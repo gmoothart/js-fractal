@@ -17,3 +17,5 @@ h1. Todo
 * animated transitions??
 * more fractals! 3d fractals?
 * use pushState() to track zoom level and allow history navigation.
+* I think we can speed up the selection-drawing by only doing a clearRect() on the region we
+  need to. That should eliminate the gap between mouse and rectangle when dragging.

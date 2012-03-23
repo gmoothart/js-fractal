@@ -27,18 +27,26 @@
               isDragging = false;
           });
           overlay.on('mousemove', function(ev) {
+              var x2 = ev.offsetX,
+                  y2;
+
+              // constrain selection to canvas aspect ration
+              if (ev.offsetY > rectYStart) {
+                y2 = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+              }
+              else {
+                y2 = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+              }
               if (isDragging) {
-                  // TODO: Constrain rectangle to proper aspect horatio
                   ctx.clearRect(0,0,800,600);
                   ctx.strokeStyle = '#6699ff';
                   ctx.beginPath();
                   ctx.moveTo(rectXStart, rectYStart);
-                  ctx.lineTo(rectXStart, ev.offsetY);
-                  ctx.lineTo(ev.offsetX, ev.offsetY);
-                  ctx.lineTo(ev.offsetX, rectYStart);
+                  ctx.lineTo(rectXStart, y2);
+                  ctx.lineTo(x2, y2);
+                  ctx.lineTo(x2, rectYStart);
                   ctx.lineTo(rectXStart, rectYStart);
                   ctx.stroke();
-
               }
           });
 
