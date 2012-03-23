@@ -9,7 +9,40 @@
       <script src="jquery-1.7.1.js"></script>
       <script src="mandelbrot.js"></script>
       <script>
-          Mandelbrot.draw( $('#c')[0] );
+          var c = $('#c'),
+              ctx = c[0].getContext('2d'),
+              isDragging = false,
+              rectXStart, rectYStart;
+
+
+          // draw selection rectangle
+          c.on('mousedown', function(ev) {
+              isDragging = true;
+
+              rectXStart = ev.offsetX;
+              rectYStart = ev.offsetY;
+          });
+          c.on('mouseup', function(ev) {
+              isDragging = false;
+          });
+          c.on('mousemove', function(ev) {
+              if (isDragging) {
+                  ctx.strokeStyle = '#6699ff';
+                  ctx.beginPath();
+                  ctx.moveTo(rectXStart, rectYStart);
+                  ctx.lineTo(rectXStart, ev.offsetY);
+                  ctx.lineTo(ev.offsetX, ev.offsetY);
+                  ctx.lineTo(ev.offsetX, rectYStart);
+                  ctx.lineTo(rectXStart, rectYStart);
+                  ctx.stroke();
+
+              }
+          });
+
+
+
+
+          Mandelbrot.draw( c[0] );
       </script>
   </body>
 </html>
