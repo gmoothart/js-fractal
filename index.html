@@ -4,29 +4,32 @@
   
   </head>
   <body>
-      <canvas id="c" width=800 height="600" />
+    <canvas id="c" width=800 height="600" style="position:absolute; z-index:0" ></canvas>
+    <canvas id="overlayCanvas" width=800 height="600" style="position:absolute; z-index:1" ></canvas>
 
       <script src="jquery-1.7.1.js"></script>
       <script src="mandelbrot.js"></script>
       <script>
-          var c = $('#c'),
-              ctx = c[0].getContext('2d'),
+          var overlay = $('#overlayCanvas'),
+              ctx = overlay[0].getContext('2d'),
               isDragging = false,
               rectXStart, rectYStart;
 
 
           // draw selection rectangle
-          c.on('mousedown', function(ev) {
+          overlay.on('mousedown', function(ev) {
               isDragging = true;
 
               rectXStart = ev.offsetX;
               rectYStart = ev.offsetY;
           });
-          c.on('mouseup', function(ev) {
+          overlay.on('mouseup', function(ev) {
               isDragging = false;
           });
-          c.on('mousemove', function(ev) {
+          overlay.on('mousemove', function(ev) {
               if (isDragging) {
+                  // TODO: Constrain rectangle to proper aspect horatio
+                  ctx.clearRect(0,0,800,600);
                   ctx.strokeStyle = '#6699ff';
                   ctx.beginPath();
                   ctx.moveTo(rectXStart, rectYStart);
@@ -42,7 +45,7 @@
 
 
 
-          Mandelbrot.draw( c[0] );
+          Mandelbrot.draw( $('#c')[0] );
       </script>
   </body>
 </html>
