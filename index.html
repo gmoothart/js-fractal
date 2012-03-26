@@ -1,11 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
-  
+    <link rel="stylesheet" type="text/css" media="all" href="960.css" />
+    <style>
+      body {
+        background-color: #123;
+      }
+      .container_12 {
+        background-color: white;
+      }
+    </style>
   </head>
   <body>
-    <canvas id="c" width=800 height="600" style="position:absolute; z-index:0" ></canvas>
-    <canvas id="overlayCanvas" width=800 height="600" style="position:absolute; z-index:1" ></canvas>
+    <div class="container_12">
+      <div class="grid_12">
+        <h1>Fractal Viewer</h1>
+        <fieldset>
+          <legend>Mandelbrot</legend>
+          <button id="mandelZoom">Zoom</button>
+          <input id="mandelOverlay" type="checkbox" />
+          <label for="mandelOverlay">Overlay Julia Set</label>
+        </fieldset>
+      </div>
+      <div class="clear"></div>
+      <div class="grid_11" style="height:600px;">
+        <canvas id="c" width=800 height="600" style="position:absolute;z-index:0" ></canvas>
+        <canvas id="overlayCanvas" width=800 height="600" style="position:absolute;z-index:1" ></canvas>
+      </div>
+      <div class="grid_1">
+          <!-- Placeholder for fractal menu -->
+      </div>
+      <div class="clear"></div>
+    </div>
 
       <script src="jquery-1.7.1.js"></script>
       <script src="mandelbrot.js"></script>
