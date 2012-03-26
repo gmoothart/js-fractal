@@ -77,19 +77,37 @@
                           ctx.stroke();
                       }
                   }
-              };
+              },
+              juliaOverlayEvents: {
+                  'mousemove.juliaOverlay': function(ev) {
+                      // show julia preview
+                      Julia.draw(ev.offsetX, ev.offsetY);
+
+                  },
+                  'mousemove.juliaOverlay': function(ev) {
+                      // switch to Julia set
+                      Julia.draw(ev.offsetX, ev.offsetY);
+
+                  }
+              }
+
 
           overlay.on(selectionEvents);
 
           $('#mandelOverlay').on('change', function(ev) {
+              //
+              // Toggle between rectangle-selection zoom and julia ovelay mode
+              //
               ctx.clearRect(0,0,800,600);
               overlay.toggleClass('crosshair');
 
               if ($(ev.currentTarget).is(':checked')) {
                   overlay.off('.selection');
+                  overlay.on(juliaOverlayEvents);
               }
               else {
                   overlay.on(selectionEvents);
+                  overlay.off('.juliaOveraly');
               }
           });
 
