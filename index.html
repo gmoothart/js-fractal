@@ -43,45 +43,54 @@
           var overlay = $('#overlayCanvas'),
               ctx = overlay[0].getContext('2d'),
               isDragging = false,
-              rectXStart, rectYStart;
+              rectXStart, rectYStart,
+              selectionEvents = {
+                  'mousedown.selection': function(ev) {
+                      isDragging = true;
 
+                      rectXStart = ev.offsetX;
+                      rectYStart = ev.offsetY;
+                  },
+                  'mouseup.selection mouseout.seletion': function(ev) {
+                      isDragging = false;
+                  },
+                  'mousemove.selection': function(ev) {
+                      var x2 = ev.offsetX,
+                          y2;
 
-          // draw selection rectangle
-          overlay.on('mousedown', function(ev) {
-              isDragging = true;
+                      // constrain selection to canvas aspect ration
+                      if (ev.offsetY > rectYStart) {
+                        y2 = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+                      }
+                      else {
+                        y2 = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+                      }
+                      if (isDragging) {
+                          ctx.clearRect(0,0,800,600);
+                          ctx.strokeStyle = '#6699ff';
+                          ctx.beginPath();
+                          ctx.moveTo(rectXStart, rectYStart);
+                          ctx.lineTo(rectXStart, y2);
+                          ctx.lineTo(x2, y2);
+                          ctx.lineTo(x2, rectYStart);
+                          ctx.lineTo(rectXStart, rectYStart);
+                          ctx.stroke();
+                      }
+                  }
+              };
 
-              rectXStart = ev.offsetX;
-              rectYStart = ev.offsetY;
-          });
-          overlay.on('mouseup mouseout', function(ev) {
-              isDragging = false;
-          });
-          overlay.on('mousemove', function(ev) {
-              var x2 = ev.offsetX,
-                  y2;
-
-              // constrain selection to canvas aspect ration
-              if (ev.offsetY > rectYStart) {
-                y2 = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-              }
-              else {
-                y2 = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-              }
-              if (isDragging) {
-                  ctx.clearRect(0,0,800,600);
-                  ctx.strokeStyle = '#6699ff';
-                  ctx.beginPath();
-                  ctx.moveTo(rectXStart, rectYStart);
-                  ctx.lineTo(rectXStart, y2);
-                  ctx.lineTo(x2, y2);
-                  ctx.lineTo(x2, rectYStart);
-                  ctx.lineTo(rectXStart, rectYStart);
-                  ctx.stroke();
-              }
-          });
+          overlay.on(selectionEvents);
 
           $('#mandelOverlay').on('change', function(ev) {
+              ctx.clearRect(0,0,800,600);
               overlay.toggleClass('crosshair');
+
+              if ($(ev.currentTarget).is(':checked')) {
+                  overlay.off('.selection');
+              }
+              else {
+                  overlay.on(selectionEvents);
+              }
           });
 
 
