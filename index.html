@@ -49,7 +49,7 @@
               rectXStart = ev.offsetX;
               rectYStart = ev.offsetY;
           });
-          overlay.on('mouseup', function(ev) {
+          overlay.on('mouseup mouseout', function(ev) {
               isDragging = false;
           });
           overlay.on('mousemove', function(ev) {
