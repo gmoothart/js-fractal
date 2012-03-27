@@ -36,14 +36,18 @@
       </div>
       <div class="clear"></div>
     </div>
-
+      <script data-main="./" src="require.js"></script>
       <script src="jquery-1.7.1.js"></script>
-      <script src="mandelbrot.js"></script>
       <script>
           var overlay = $('#overlayCanvas'),
+              w = overlay.width(),
+              h = overlay.height(),
+              minR = -2.5, maxR = 1.5,
+              minI = -1.5, maxI = 1.5,
               ctx = overlay[0].getContext('2d'),
               isDragging = false,
               rectXStart, rectYStart,
+              rectXEnd, rectYEnd,
               selectionEvents = {
                   'mousedown.selection': function(ev) {
                       isDragging = true;
@@ -51,34 +55,34 @@
                       rectXStart = ev.offsetX;
                       rectYStart = ev.offsetY;
                   },
-                  'mouseup.selection mouseout.seletion': function(ev) {
+                  'mouseup.selection mouseout.selection': function(ev) {
                       isDragging = false;
                   },
                   'mousemove.selection': function(ev) {
-                      var x2 = ev.offsetX,
-                          y2;
-
-                      // constrain selection to canvas aspect ration
-                      if (ev.offsetY > rectYStart) {
-                        y2 = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-                      }
-                      else {
-                        y2 = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-                      }
                       if (isDragging) {
-                          ctx.clearRect(0,0,800,600);
+                          rectXEnd = ev.offsetX;
+
+                          // constrain selection to canvas aspect ration
+                          if (ev.offsetY > rectYStart) {
+                            rectYEnd = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+                          }
+                          else {
+                            rectYEnd = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
+                          }
+
+                          ctx.clearRect(0,0,w,h);
                           ctx.strokeStyle = '#6699ff';
                           ctx.beginPath();
                           ctx.moveTo(rectXStart, rectYStart);
-                          ctx.lineTo(rectXStart, y2);
-                          ctx.lineTo(x2, y2);
-                          ctx.lineTo(x2, rectYStart);
+                          ctx.lineTo(rectXStart, rectYEnd);
+                          ctx.lineTo(rectXEnd, rectYEnd);
+                          ctx.lineTo(rectXEnd, rectYStart);
                           ctx.lineTo(rectXStart, rectYStart);
                           ctx.stroke();
                       }
                   }
               },
-              juliaOverlayEvents: {
+              juliaOverlayEvents = {
                   'mousemove.juliaOverlay': function(ev) {
                       // show julia preview
                       Julia.draw(ev.offsetX, ev.offsetY);
@@ -91,14 +95,42 @@
                   }
               }
 
-
           overlay.on(selectionEvents);
+          $('#mandelZoom').on('click', function(ev) {
+
+              require(['mandelbrot'], function(mandelbrot) {
+                  var r1 = mandelbrot.mapPixelToComplexCoord(rectXStart, w, minR, maxR),
+                      r2 = mandelbrot.mapPixelToComplexCoord(rectXEnd, w, minR, maxR),
+                      i1 = mandelbrot.mapPixelToComplexCoord(rectYStart, h, minI, maxI),
+                      i2 = mandelbrot.mapPixelToComplexCoord(rectYEnd, h, minI, maxI);
+
+                  if (r1 > r2) {
+                      maxR = r1;
+                      minR = r2;
+                  }
+                  else {
+                      maxR = r2;
+                      minR = r1;
+                  }
+
+                  if (i1 > i2) {
+                      minI = i2;
+                      maxI = i1;
+                  }
+                  else {
+                      minI = i1;
+                      maxI = i2;
+                  }
+
+                  mandelbrot.draw( $('#c')[0], minR, minI, maxR, maxI);
+              });
+          });
 
           $('#mandelOverlay').on('change', function(ev) {
               //
               // Toggle between rectangle-selection zoom and julia ovelay mode
               //
-              ctx.clearRect(0,0,800,600);
+              ctx.clearRect(0,0,w,h);
               overlay.toggleClass('crosshair');
 
               if ($(ev.currentTarget).is(':checked')) {
@@ -112,8 +144,9 @@
           });
 
 
-          Mandelbrot.draw( $('#c')[0] );
-
+        require(['mandelbrot'], function(mandelbrot) {
+            mandelbrot.draw( $('#c')[0], minR, minI, maxR, maxI );
+        });
       </script>
   </body>
 </html>

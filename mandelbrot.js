@@ -1,18 +1,33 @@
 
-Mandelbrot = {};
-(function() {
+define(function(g) {
     "use strict";
 
-    Mandelbrot.draw = function(canvasEl) {
+    return {
+        draw: draw,
+        mapPixelToComplexCoord: mapPixelToComplexCoord,
+        mapComplexCoordToPixel: mapComplexCoordToPixel
+    };
+
+    function mapPixelToComplexCoord(p, canvasWidth, minC, maxC) {
+        var step = Math.abs(maxC - minC) / canvasWidth;
+        return p * step + minC
+    }
+
+    function mapComplexCoordToPixel(c, canvasWidth, minC, maxC) {
+        var step = Math.abs(maxC - minC) / canvasWidth;
+        return (c - minC) / step;
+    }
+
+    function draw(canvasEl, minR, minI, maxR, maxI) {
         var w = canvasEl.width,
             h = canvasEl.height,
-            minR = -2.5, maxR = 1.5,
-            minI = -1.5, maxI = 1.5,
             x,y,r,i,
             originX, originY,
             iter,
             maxIter = 100,
             ctx = canvasEl.getContext('2d');
+
+        ctx.clearRect(0,0,w,h);
 
         // draw axes
         // x-axis is the line from (minR,0) to (maxR,0) and
@@ -51,7 +66,7 @@ Mandelbrot = {};
         }
     }
 
-    var diverges = function(cR, cI, maxIter)
+    function diverges(cR, cI, maxIter)
     {
         var i, magnitude,
             zR=0, zI=0, 
@@ -74,16 +89,6 @@ Mandelbrot = {};
         return i;
     }
 
-    var mapPixelToComplexCoord = function(p, canvasWidth, minC, maxC)
-    {
-        var step = Math.abs(maxC - minC) / canvasWidth;
-        return p * step + minC
-    }
 
-    var mapComplexCoordToPixel = function(c, canvasWidth, minC, maxC)
-    {
-        var step = Math.abs(maxC - minC) / canvasWidth;
-        return (c - minC) / step;
-    }
 
-})();
+});

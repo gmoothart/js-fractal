@@ -22,3 +22,5 @@ h1. Todo
 * add "slow-mo" view, to show the Mandelbrot set being constructed one iteration at a time.
 * draw Mandelbrot set off the UI thread, so it does not block loading of the whole page
 * Draw x,y axis thinner, as a 1px line
+* dashed selection line
+* change mandelbrot code to spit out data that can be drawn to a canvas, instead of drawing directly to the canvas.
