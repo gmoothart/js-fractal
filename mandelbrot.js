@@ -3,7 +3,7 @@ define(function(g) {
     "use strict";
 
     return {
-        draw: draw,
+        drawTo: drawTo,
         mapPixelToComplexCoord: mapPixelToComplexCoord,
         mapComplexCoordToPixel: mapComplexCoordToPixel
     };
@@ -18,33 +18,20 @@ define(function(g) {
         return (c - minC) / step;
     }
 
-    function draw(canvasEl, minR, minI, maxR, maxI) {
-        var w = canvasEl.width,
-            h = canvasEl.height,
+    /*
+     * Draw a portion of the Mandelbrot set to the 
+     * imageData
+     */
+    function drawTo(imgData, minR, minI, maxR, maxI) {
+        var w = imgData.width,
+            h = imgData.height,
+            pixelArr = imgData.data,
             x,y,r,i,
             originX, originY,
             iter,
-            maxIter = 100,
-            ctx = canvasEl.getContext('2d');
+            pos,
+            maxIter = 100;
 
-        ctx.clearRect(0,0,w,h);
-
-        // draw axes
-        // x-axis is the line from (minR,0) to (maxR,0) and
-        // y-axis is the line from (minI,0) to (maxI,0)
-        // We need to map that to pixel coordinates
-        originX = mapComplexCoordToPixel(0, w, minR, maxR);
-        originY = mapComplexCoordToPixel(0, h, minI, maxI);
-
-        ctx.strokeStyle = '#6699ff';
-        ctx.beginPath();
-        ctx.moveTo(0,originY);
-        ctx.lineTo(w,originY); // x-axis
-        ctx.moveTo(originX,0);
-        ctx.lineTo(originX,h); // y-axis
-        ctx.stroke();
-
-        ctx.strokeStyle = '#fff';
         // draw set
         for(x=0; x<w; x++) {
             r = mapPixelToComplexCoord(x, w, minR, maxR);
@@ -60,7 +47,11 @@ define(function(g) {
                 // if it did not diverge after `maxIter` iterations,
                 // it is in the set. Draw it!
                 if (iter >= maxIter) {
-                    ctx.fillRect(x,y,1,1);
+                    pos = (y*w + x) * 4;
+                    pixelArr[pos + 0] = 0; // R
+                    pixelArr[pos + 1] = 0; // G
+                    pixelArr[pos + 2] = 0; // B
+                    pixelArr[pos + 3] = 255; // Alpha
                 }
             }
         }
