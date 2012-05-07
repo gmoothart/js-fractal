@@ -40,10 +40,14 @@
       <script src="jquery-1.7.1.js"></script>
       <script>
           var overlay = $('#overlayCanvas'),
-              w = overlay.width(),
-              h = overlay.height(),
-              minR = -2.5, maxR = 1.5,
-              minI = -1.5, maxI = 1.5,
+              world = {
+                  width: overlay.width(),
+                  height: overlay.height(),
+                  minR: -2.5,
+                  maxR: 1.5,
+                  minI: -1.5,
+                  maxI: 1.5,
+              },
               ctx = overlay[0].getContext('2d'),
               isDragging = false,
               rectXStart, rectYStart,
@@ -70,7 +74,7 @@
                             rectYEnd = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
                           }
 
-                          ctx.clearRect(0,0,w,h);
+                          ctx.clearRect(0,0,world.width, world.height);
                           ctx.strokeStyle = '#6699ff';
                           ctx.beginPath();
                           ctx.moveTo(rectXStart, rectYStart);
@@ -99,35 +103,15 @@
           $('#mandelZoom').on('click', function(ev) {
 
               require(['mandelbrot'], function(mandelbrot) {
-                  var r1 = mandelbrot.mapPixelToComplexCoord(rectXStart, w, minR, maxR),
-                      r2 = mandelbrot.mapPixelToComplexCoord(rectXEnd, w, minR, maxR),
-                      i1 = mandelbrot.mapPixelToComplexCoord(rectYStart, h, minI, maxI),
-                      i2 = mandelbrot.mapPixelToComplexCoord(rectYEnd, h, minI, maxI),
-                      ctx,
+                  var ctx,
                       imgData;
 
-                  if (r1 > r2) {
-                      maxR = r1;
-                      minR = r2;
-                  }
-                  else {
-                      maxR = r2;
-                      minR = r1;
-                  }
-
-                  if (i1 > i2) {
-                      minI = i2;
-                      maxI = i1;
-                  }
-                  else {
-                      minI = i1;
-                      maxI = i2;
-                  }
+                  updateWorld(mandelbrot.mapPixelToComplexCoord, rectXStart, rectYStart, rectXEnd, rectYEnd);
 
                   ctx = $('#c')[0].getContext('2d'),
                   imgData = ctx.createImageData(800,600);
 
-                  mandelbrot.drawTo(imgData, minR, minI, maxR, maxI );
+                  mandelbrot.drawTo(imgData, world);
                   ctx.putImageData(imgData, 0, 0);
               });
           });
@@ -152,27 +136,45 @@
 
         require(['mandelbrot'], function(mandelbrot) {
 
-          // draw axes
-          // x-axis is the line from (minR,0) to (maxR,0) and
-          // y-axis is the line from (minI,0) to (maxI,0)
-          // We need to map that to pixel coordinates
-          var originX = mandelbrot.mapComplexCoordToPixel(0, w, minR, maxR),
-              originY = mandelbrot.mapComplexCoordToPixel(0, h, minI, maxI),
-              ctx = $('#c')[0].getContext('2d'),
+          var ctx = $('#c')[0].getContext('2d'),
               imgData = ctx.createImageData(800,600);
 
-
-          ctx.strokeStyle = '#6699ff';
-          ctx.beginPath();
-          ctx.moveTo(0,originY);
-          ctx.lineTo(w,originY); // x-axis
-          ctx.moveTo(originX,0);
-          ctx.lineTo(originX,h); // y-axis
-          ctx.stroke();
-
-          mandelbrot.drawTo(imgData, minR, minI, maxR, maxI );
+          mandelbrot.drawTo(imgData, world);
           ctx.putImageData(imgData, 0, 0);
         });
+
+
+        function updateWorld(mapFn, newx1, newy1, newx2, newy2) {
+            var r1 = mapFn(newx1, world.width, world.minR, world.maxR),
+                i1 = mapFn(newy1, world.height, world.minI, world.maxI),
+                r2 = mapFn(newx2, world.width, world.minR, world.maxR),
+                i2 = mapFn(newy2, world.height, world.minI, world.maxI);
+
+            if (r1 > r2) {
+                world.maxR = r1;
+                world.minR = r2;
+            }
+            else {
+                world.maxR = r2;
+                world.minR = r1;
+            }
+
+            if (i1 > i2) {
+                world.minI = i2;
+                world.maxI = i1;
+            }
+            else {
+                world.minI = i1;
+                world.maxI = i2;
+            }
+        }
+
+        function resetWorld() {
+            world.minR = -2.5;
+            world.maxR = 1.5;
+            world.minI = -1.5;
+            world.maxI = 1.5;
+        }
       </script>
   </body>
 </html>

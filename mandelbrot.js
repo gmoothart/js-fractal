@@ -22,9 +22,9 @@ define(function(g) {
      * Draw a portion of the Mandelbrot set to the 
      * imageData
      */
-    function drawTo(imgData, minR, minI, maxR, maxI) {
-        var w = imgData.width,
-            h = imgData.height,
+    function drawTo(imgData, world) {
+        var w = world.width,
+            h = world.height,
             pixelArr = imgData.data,
             x,y,r,i,
             originX, originY,
@@ -34,12 +34,12 @@ define(function(g) {
 
         // draw set
         for(x=0; x<w; x++) {
-            r = mapPixelToComplexCoord(x, w, minR, maxR);
+            r = mapPixelToComplexCoord(x, w, world.minR, world.maxR);
 
             for(y=0; y<h; y++) {
 
                 // convert pixel x,y to coordinate on the complex plane
-                i = mapPixelToComplexCoord(y, h, minI, maxI);
+                i = mapPixelToComplexCoord(y, h, world.minI, world.maxI);
                 
                 // does the point diverge?
                 iter = diverges(r,i, maxIter);
