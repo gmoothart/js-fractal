@@ -3,7 +3,7 @@ define(function(g) {
     "use strict";
 
     return {
-        drawTo: drawTo,
+        compute: compute,
         mapPixelToComplexCoord: mapPixelToComplexCoord,
         mapComplexCoordToPixel: mapComplexCoordToPixel
     };
@@ -22,14 +22,14 @@ define(function(g) {
      * Draw a portion of the Mandelbrot set to the 
      * imageData
      */
-    function drawTo(imgData, world) {
+    function compute(world, drawFn, colorFn) {
         var w = world.width,
             h = world.height,
-            pixelArr = imgData.data,
             x,y,r,i,
             originX, originY,
             iter,
             pos,
+            rgbArr,
             maxIter = 100;
 
         // draw set
@@ -46,13 +46,10 @@ define(function(g) {
 
                 // if it did not diverge after `maxIter` iterations,
                 // it is in the set. Draw it!
-                if (iter >= maxIter) {
-                    pos = (y*w + x) * 4;
-                    pixelArr[pos + 0] = 0; // R
-                    pixelArr[pos + 1] = 0; // G
-                    pixelArr[pos + 2] = 0; // B
-                    pixelArr[pos + 3] = 255; // Alpha
-                }
+                //if (iter >= maxIter) {
+                    rgbArr = colorFn(iter, maxIter);
+                    drawFn(x, y, rgbArr);
+                //}
             }
         }
     }
@@ -63,9 +60,8 @@ define(function(g) {
             zR=0, zI=0, 
             tmpR, tmpI,
             threshold=2;
-        // start at 1 instead of 0 because we want i to be the actual number
-        // of iterations
-        for(i=1; i <= maxIter; i++) {
+
+        for(i=0; i < maxIter; i++) {
             // z = z^2 + c
             tmpR = zR*zR - zI*zI;
             tmpI = 2*zR*zI; // should be 2 * zR * zI ???
@@ -79,7 +75,4 @@ define(function(g) {
 
         return i;
     }
-
-
-
 });

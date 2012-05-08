@@ -48,7 +48,7 @@
                   minI: -1.5,
                   maxI: 1.5,
               },
-              ctx = overlay[0].getContext('2d'),
+              overlayCtx = overlay[0].getContext('2d'),
               isDragging = false,
               rectXStart, rectYStart,
               rectXEnd, rectYEnd,
@@ -74,15 +74,15 @@
                             rectYEnd = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
                           }
 
-                          ctx.clearRect(0,0,world.width, world.height);
-                          ctx.strokeStyle = '#6699ff';
-                          ctx.beginPath();
-                          ctx.moveTo(rectXStart, rectYStart);
-                          ctx.lineTo(rectXStart, rectYEnd);
-                          ctx.lineTo(rectXEnd, rectYEnd);
-                          ctx.lineTo(rectXEnd, rectYStart);
-                          ctx.lineTo(rectXStart, rectYStart);
-                          ctx.stroke();
+                          overlayCtx.clearRect(0,0,world.width, world.height);
+                          overlayCtx.strokeStyle = '#6699ff';
+                          overlayCtx.beginPath();
+                          overlayCtx.moveTo(rectXStart, rectYStart);
+                          overlayCtx.lineTo(rectXStart, rectYEnd);
+                          overlayCtx.lineTo(rectXEnd, rectYEnd);
+                          overlayCtx.lineTo(rectXEnd, rectYStart);
+                          overlayCtx.lineTo(rectXStart, rectYStart);
+                          overlayCtx.stroke();
                       }
                   }
               },
@@ -111,8 +111,15 @@
                   ctx = $('#c')[0].getContext('2d'),
                   imgData = ctx.createImageData(800,600);
 
-                  mandelbrot.drawTo(imgData, world);
+
+                  mandelbrot.compute(world, 
+                    function(x,y,rgbArr) { drawToImageData(imgData.data,x,y,rgbArr); },
+                    setColorGrayscale);
+
                   ctx.putImageData(imgData, 0, 0);
+
+                  // clear selection box
+                  overlayCtx.clearRect(0,0,world.width,world.height);
               });
           });
 
@@ -120,7 +127,7 @@
               //
               // Toggle between rectangle-selection zoom and julia ovelay mode
               //
-              ctx.clearRect(0,0,w,h);
+              overlayCtx.clearRect(0,0,world.width,world.height);
               overlay.toggleClass('crosshair');
 
               if ($(ev.currentTarget).is(':checked')) {
@@ -132,17 +139,6 @@
                   overlay.off('.juliaOveraly');
               }
           });
-
-
-        require(['mandelbrot'], function(mandelbrot) {
-
-          var ctx = $('#c')[0].getContext('2d'),
-              imgData = ctx.createImageData(800,600);
-
-          mandelbrot.drawTo(imgData, world);
-          ctx.putImageData(imgData, 0, 0);
-        });
-
 
         function updateWorld(mapFn, newx1, newy1, newx2, newy2) {
             var r1 = mapFn(newx1, world.width, world.minR, world.maxR),
@@ -175,6 +171,39 @@
             world.minI = -1.5;
             world.maxI = 1.5;
         }
+
+        function setColorGrayscale(iter, maxIter) {
+            // normalize to a 0..255 range
+            var norm = 255 - Math.floor(255 * iter/maxIter);
+
+            // simple, just scale smoothly from white to black
+            return [norm, norm, norm, 255];
+        }
+
+        function drawToImageData(pixelArr, x, y, rgbArr) {
+
+              var pos = (y*world.width + x) * 4;
+
+              pixelArr[pos + 0] = rgbArr[0]; // R
+              pixelArr[pos + 1] = rgbArr[1]; // G
+              pixelArr[pos + 2] = rgbArr[2]; // B
+              pixelArr[pos + 3] = rgbArr[3]; // Alpha
+        }
+
+
+        // draw the full set
+        require(['mandelbrot'], function(mandelbrot) {
+
+          var ctx = $('#c')[0].getContext('2d'),
+              imgData = ctx.createImageData(800,600);
+
+          mandelbrot.compute(world, 
+            function(x,y,rgbArr) { drawToImageData(imgData.data,x,y,rgbArr); },
+            setColorGrayscale);
+
+          ctx.putImageData(imgData, 0, 0);
+        });
+
       </script>
   </body>
 </html>
