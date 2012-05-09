@@ -4,6 +4,7 @@ define(function(g) {
 
     return {
         compute: compute,
+        computeJulia: computeJulia,
         mapPixelToComplexCoord: mapPixelToComplexCoord,
         mapComplexCoordToPixel: mapComplexCoordToPixel
     };
@@ -26,7 +27,6 @@ define(function(g) {
         var w = world.width,
             h = world.height,
             x,y,r,i,
-            originX, originY,
             iter,
             pos,
             rgbArr,
@@ -41,23 +41,47 @@ define(function(g) {
                 // convert pixel x,y to coordinate on the complex plane
                 i = mapPixelToComplexCoord(y, h, world.minI, world.maxI);
                 
-                // does the point diverge?
-                iter = diverges(r,i, maxIter);
+                // number of iterations before divergence
+                iter = diverges(r, i, 0, 0, maxIter);
 
-                // if it did not diverge after `maxIter` iterations,
-                // it is in the set. Draw it!
-                //if (iter >= maxIter) {
-                    rgbArr = colorFn(iter, maxIter);
-                    drawFn(x, y, rgbArr);
-                //}
+                rgbArr = colorFn(iter, maxIter);
+                drawFn(x, y, rgbArr);
             }
         }
     }
 
-    function diverges(cR, cI, maxIter)
-    {
+    // todo: can generate more accurately, cf. wikipedia
+    function computeJulia(world, startR, startI, drawFn, colorFn) {
+        var w = world.width,
+            h = world.height,
+            x,y,r,i,
+            iter,
+            pos,
+            rgbArr,
+            maxIter = 100;
+
+        // draw set
+        for(x=0; x<w; x++) {
+            r = mapPixelToComplexCoord(x, w, world.minR, world.maxR);
+
+            for(y=0; y<h; y++) {
+
+                // convert pixel x,y to coordinate on the complex plane
+                i = mapPixelToComplexCoord(y, h, world.minI, world.maxI);
+                
+                // number of iterations before divergence
+                // Julia set starts out at 
+                iter = diverges(startR, startI, r, i, maxIter);
+
+                rgbArr = colorFn(iter, maxIter);
+                drawFn(x, y, rgbArr);
+            }
+        }
+
+    }
+
+    function diverges(cR, cI, zR, zI, maxIter) {
         var i, magnitude,
-            zR=0, zI=0, 
             tmpR, tmpI,
             threshold=2;
 

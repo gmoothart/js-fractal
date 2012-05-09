@@ -22,6 +22,7 @@
         <fieldset>
           <legend>Mandelbrot</legend>
           <button id="mandelZoom">Zoom</button>
+          <button id="mandelReset">Reset</button>
           <input id="mandelOverlay" type="checkbox" />
           <label for="mandelOverlay">Overlay Julia Set</label>
         </fieldset>
@@ -43,6 +44,14 @@
               world = {
                   width: overlay.width(),
                   height: overlay.height(),
+                  minR: -2.5,
+                  maxR: 1.5,
+                  minI: -1.5,
+                  maxI: 1.5,
+              },
+              previewWorld = {
+                  width: 80,
+                  height: 60,
                   minR: -2.5,
                   maxR: 1.5,
                   minI: -1.5,
@@ -88,11 +97,28 @@
               },
               juliaOverlayEvents = {
                   'mousemove.juliaOverlay': function(ev) {
-                      // show julia preview
-                      Julia.draw(ev.offsetX, ev.offsetY);
 
+                      require(['mandelbrot'], function(mandelbrot) {
+                          var ctx,
+                              imgData,
+                              startR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
+                              startI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
+
+
+                          console.log('draw overlay at (' + startR + ',' + startI + ')');
+
+                          ctx = $('#c')[0].getContext('2d'),
+                          imgData = ctx.createImageData(previewWorld.width, previewWorld.height);
+
+                          // show julia preview
+                          mandelbrot.computeJulia(previewWorld, startR, startI,
+                            function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
+                            setColorGrayscale);
+
+                          ctx.putImageData(imgData, 0, 0);
+                      });
                   },
-                  'mousemove.juliaOverlay': function(ev) {
+                  'click.juliaOverlay': function(ev) {
                       // switch to Julia set
                       Julia.draw(ev.offsetX, ev.offsetY);
 
@@ -113,7 +139,7 @@
 
 
                   mandelbrot.compute(world, 
-                    function(x,y,rgbArr) { drawToImageData(imgData.data,x,y,rgbArr); },
+                    function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
                     setColorGrayscale);
 
                   ctx.putImageData(imgData, 0, 0);
@@ -121,6 +147,29 @@
                   // clear selection box
                   overlayCtx.clearRect(0,0,world.width,world.height);
               });
+          });
+
+          $('#mandelReset').on('click', function(ev) {
+              require(['mandelbrot'], function(mandelbrot) {
+                  var ctx,
+                      imgData;
+
+                  resetWorld();
+
+                  ctx = $('#c')[0].getContext('2d'),
+                  imgData = ctx.createImageData(800,600);
+
+
+                  mandelbrot.compute(world, 
+                    function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
+                    setColorGrayscale);
+
+                  ctx.putImageData(imgData, 0, 0);
+
+                  // clear selection box
+                  overlayCtx.clearRect(0,0,world.width,world.height);
+              });
+
           });
 
           $('#mandelOverlay').on('change', function(ev) {
@@ -174,15 +223,15 @@
 
         function setColorGrayscale(iter, maxIter) {
             // normalize to a 0..255 range
-            var norm = 255 - Math.floor(255 * iter/maxIter);
+            var norm = Math.floor(255 * iter/maxIter);
 
             // simple, just scale smoothly from white to black
             return [norm, norm, norm, 255];
         }
 
-        function drawToImageData(pixelArr, x, y, rgbArr) {
+        function drawToImageData(pixelArr, width, x, y, rgbArr) {
 
-              var pos = (y*world.width + x) * 4;
+              var pos = (y*width + x) * 4;
 
               pixelArr[pos + 0] = rgbArr[0]; // R
               pixelArr[pos + 1] = rgbArr[1]; // G
@@ -198,7 +247,7 @@
               imgData = ctx.createImageData(800,600);
 
           mandelbrot.compute(world, 
-            function(x,y,rgbArr) { drawToImageData(imgData.data,x,y,rgbArr); },
+            function(x,y,rgbArr) { drawToImageData(imgData.data, world.width, x, y, rgbArr); },
             setColorGrayscale);
 
           ctx.putImageData(imgData, 0, 0);
