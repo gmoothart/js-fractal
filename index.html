@@ -50,8 +50,8 @@
                   maxI: 1.5,
               },
               previewWorld = {
-                  width: 80,
-                  height: 60,
+                  width: 120,
+                  height: 90,
                   minR: -2.5,
                   maxR: 1.5,
                   minI: -1.5,
@@ -113,7 +113,7 @@
                           // show julia preview
                           mandelbrot.computeJulia(previewWorld, startR, startI,
                             function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
-                            setColorGrayscale);
+                            invertColors(setColorGrayscale));
 
                           ctx.putImageData(imgData, 0, 0);
                       });
@@ -135,7 +135,7 @@
                   updateWorld(mandelbrot.mapPixelToComplexCoord, rectXStart, rectYStart, rectXEnd, rectYEnd);
 
                   ctx = $('#c')[0].getContext('2d'),
-                  imgData = ctx.createImageData(800,600);
+                  imgData = ctx.createImageData(world.width,world.height);
 
 
                   mandelbrot.compute(world, 
@@ -157,7 +157,7 @@
                   resetWorld();
 
                   ctx = $('#c')[0].getContext('2d'),
-                  imgData = ctx.createImageData(800,600);
+                  imgData = ctx.createImageData(world.width,world.height);
 
 
                   mandelbrot.compute(world, 
@@ -229,6 +229,18 @@
             return [norm, norm, norm, 255];
         }
 
+        function invertColors(colorFn) {
+            return function(iter,maxIter) {
+                var a = colorFn(iter,maxIter);
+
+                a[0] = 255-a[0];
+                a[1] = 255-a[1];
+                a[2] = 255-a[2];
+
+                return a;
+            };
+        }
+
         function drawToImageData(pixelArr, width, x, y, rgbArr) {
 
               var pos = (y*width + x) * 4;
@@ -244,7 +256,7 @@
         require(['mandelbrot'], function(mandelbrot) {
 
           var ctx = $('#c')[0].getContext('2d'),
-              imgData = ctx.createImageData(800,600);
+              imgData = ctx.createImageData(world.width,world.height);
 
           mandelbrot.compute(world, 
             function(x,y,rgbArr) { drawToImageData(imgData.data, world.width, x, y, rgbArr); },
