@@ -3,8 +3,15 @@ define(function(g) {
     "use strict";
 
     return {
-        compute: compute,
-        computeJulia: computeJulia,
+        compute: function(world, drawFn, colorFn) { 
+            _compute(world, function(r,i,maxIter){ return _diverges(r,i,0,0,maxIter); }, 
+            drawFn, colorFn); 
+        },
+        // todo: can generate more accurately, cf. wikipedia
+        computeJulia: function(world, startR, startI, drawFn, colorFn) { 
+            _compute(world, function(r,i,maxIter){ return _diverges(startR,startI,r,i,maxIter); }, 
+            drawFn, colorFn); 
+        },
         mapPixelToComplexCoord: mapPixelToComplexCoord,
         mapComplexCoordToPixel: mapComplexCoordToPixel
     };
@@ -19,39 +26,9 @@ define(function(g) {
         return (c - minC) / step;
     }
 
-    /*
-     * Draw a portion of the Mandelbrot set to the 
-     * imageData
-     */
-    function compute(world, drawFn, colorFn) {
-        var w = world.width,
-            h = world.height,
-            x,y,r,i,
-            iter,
-            pos,
-            rgbArr,
-            maxIter = 100;
 
-        // draw set
-        for(x=0; x<w; x++) {
-            r = mapPixelToComplexCoord(x, w, world.minR, world.maxR);
-
-            for(y=0; y<h; y++) {
-
-                // convert pixel x,y to coordinate on the complex plane
-                i = mapPixelToComplexCoord(y, h, world.minI, world.maxI);
-                
-                // number of iterations before divergence
-                iter = diverges(r, i, 0, 0, maxIter);
-
-                rgbArr = colorFn(iter, maxIter);
-                drawFn(x, y, rgbArr);
-            }
-        }
-    }
-
-    // todo: can generate more accurately, cf. wikipedia
-    function computeJulia(world, startR, startI, drawFn, colorFn) {
+    // computes a julia or mandelbrot set, based on divergeFn
+    function _compute(world, divergeFn, drawFn, colorFn) {
         var w = world.width,
             h = world.height,
             x,y,r,i,
@@ -71,16 +48,18 @@ define(function(g) {
                 
                 // number of iterations before divergence
                 // Julia set starts out at 
-                iter = diverges(startR, startI, r, i, maxIter);
+                iter = divergeFn(r, i, maxIter);
 
                 rgbArr = colorFn(iter, maxIter);
                 drawFn(x, y, rgbArr);
             }
         }
-
     }
 
-    function diverges(cR, cI, zR, zI, maxIter) {
+    // iterate over z = z^2 + c `maxIter` times
+    // For the Julia set, z is a point in the plane
+    // for the Mandelbrot set, z is 0
+    function _diverges(cR, cI, zR, zI, maxIter) {
         var i, magnitude,
             tmpR, tmpI,
             threshold=2;
