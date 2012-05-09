@@ -1,15 +1,16 @@
 
-define(function(g) {
+(function(){
     "use strict";
 
-    return {
+    // public signature
+    window.mandelbrot = {
         compute: function(world, drawFn, colorFn) { 
-            _compute(world, function(r,i,maxIter){ return _diverges(r,i,0,0,maxIter); }, 
+            compute(world, function(r,i,maxIter){ return diverges(r,i,0,0,maxIter); }, 
             drawFn, colorFn); 
         },
         // todo: can generate more accurately, cf. wikipedia
         computeJulia: function(world, startR, startI, drawFn, colorFn) { 
-            _compute(world, function(r,i,maxIter){ return _diverges(startR,startI,r,i,maxIter); }, 
+            compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); }, 
             drawFn, colorFn); 
         },
         mapPixelToComplexCoord: mapPixelToComplexCoord,
@@ -28,7 +29,7 @@ define(function(g) {
 
 
     // computes a julia or mandelbrot set, based on divergeFn
-    function _compute(world, divergeFn, drawFn, colorFn) {
+    function compute(world, divergeFn, drawFn, colorFn) {
         var w = world.width,
             h = world.height,
             x,y,r,i,
@@ -59,7 +60,7 @@ define(function(g) {
     // iterate over z = z^2 + c `maxIter` times
     // For the Julia set, z is a point in the plane
     // for the Mandelbrot set, z is 0
-    function _diverges(cR, cI, zR, zI, maxIter) {
+    function diverges(cR, cI, zR, zI, maxIter) {
         var i, magnitude,
             tmpR, tmpI,
             threshold=2;
@@ -78,4 +79,4 @@ define(function(g) {
 
         return i;
     }
-});
+})();

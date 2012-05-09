@@ -36,10 +36,15 @@
           <!-- Placeholder for fractal menu -->
       </div>
       <div class="clear"></div>
+      <div>
+        <span>Coordinates:</span>
+        <span id="coordspan"></span>
+      </div>
     </div>
-      <script data-main="./" src="require.js"></script>
+      <script src="mandelbrot.js"></script>
       <script src="jquery-1.7.1.js"></script>
       <script>
+          "use strict";
           var overlay = $('#overlayCanvas'),
               world = {
                   width: overlay.width(),
@@ -92,31 +97,37 @@
                           overlayCtx.lineTo(rectXEnd, rectYStart);
                           overlayCtx.lineTo(rectXStart, rectYStart);
                           overlayCtx.stroke();
+
+                          // show selection region
+
+                      }
+                      else {
+                          // show current point
+
+
                       }
                   }
               },
               juliaOverlayEvents = {
                   'mousemove.juliaOverlay': function(ev) {
 
-                      require(['mandelbrot'], function(mandelbrot) {
-                          var ctx,
-                              imgData,
-                              startR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
-                              startI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
+                      var ctx,
+                          imgData,
+                          startR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
+                          startI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
 
 
-                          console.log('draw overlay at (' + startR + ',' + startI + ')');
+                      console.log('draw overlay at (' + startR + ',' + startI + ')');
 
-                          ctx = $('#c')[0].getContext('2d'),
-                          imgData = ctx.createImageData(previewWorld.width, previewWorld.height);
+                      ctx = $('#c')[0].getContext('2d'),
+                      imgData = ctx.createImageData(previewWorld.width, previewWorld.height);
 
-                          // show julia preview
-                          mandelbrot.computeJulia(previewWorld, startR, startI,
-                            function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
-                            invertColors(setColorGrayscale));
+                      // show julia preview
+                      mandelbrot.computeJulia(previewWorld, startR, startI,
+                        function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
+                        invertColors(setColorGrayscale));
 
-                          ctx.putImageData(imgData, 0, 0);
-                      });
+                      ctx.putImageData(imgData, 0, 0);
                   },
                   'click.juliaOverlay': function(ev) {
                       // switch to Julia set
@@ -128,48 +139,43 @@
           overlay.on(selectionEvents);
           $('#mandelZoom').on('click', function(ev) {
 
-              require(['mandelbrot'], function(mandelbrot) {
-                  var ctx,
-                      imgData;
+              var ctx,
+                  imgData;
 
-                  updateWorld(mandelbrot.mapPixelToComplexCoord, rectXStart, rectYStart, rectXEnd, rectYEnd);
+              updateWorld(rectXStart, rectYStart, rectXEnd, rectYEnd);
 
-                  ctx = $('#c')[0].getContext('2d'),
-                  imgData = ctx.createImageData(world.width,world.height);
+              ctx = $('#c')[0].getContext('2d'),
+              imgData = ctx.createImageData(world.width,world.height);
 
 
-                  mandelbrot.compute(world, 
-                    function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
-                    setColorGrayscale);
+              mandelbrot.compute(world, 
+                function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
+                setColorGrayscale);
 
-                  ctx.putImageData(imgData, 0, 0);
+              ctx.putImageData(imgData, 0, 0);
 
-                  // clear selection box
-                  overlayCtx.clearRect(0,0,world.width,world.height);
-              });
+              // clear selection box
+              overlayCtx.clearRect(0,0,world.width,world.height);
           });
 
           $('#mandelReset').on('click', function(ev) {
-              require(['mandelbrot'], function(mandelbrot) {
-                  var ctx,
-                      imgData;
+              var ctx,
+                  imgData;
 
-                  resetWorld();
+              resetWorld();
 
-                  ctx = $('#c')[0].getContext('2d'),
-                  imgData = ctx.createImageData(world.width,world.height);
+              ctx = $('#c')[0].getContext('2d'),
+              imgData = ctx.createImageData(world.width,world.height);
 
 
-                  mandelbrot.compute(world, 
-                    function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
-                    setColorGrayscale);
+              mandelbrot.compute(world, 
+                function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
+                setColorGrayscale);
 
-                  ctx.putImageData(imgData, 0, 0);
+              ctx.putImageData(imgData, 0, 0);
 
-                  // clear selection box
-                  overlayCtx.clearRect(0,0,world.width,world.height);
-              });
-
+              // clear selection box
+              overlayCtx.clearRect(0,0,world.width,world.height);
           });
 
           $('#mandelOverlay').on('change', function(ev) {
@@ -189,11 +195,11 @@
               }
           });
 
-        function updateWorld(mapFn, newx1, newy1, newx2, newy2) {
-            var r1 = mapFn(newx1, world.width, world.minR, world.maxR),
-                i1 = mapFn(newy1, world.height, world.minI, world.maxI),
-                r2 = mapFn(newx2, world.width, world.minR, world.maxR),
-                i2 = mapFn(newy2, world.height, world.minI, world.maxI);
+        function updateWorld(newx1, newy1, newx2, newy2) {
+            var r1 = mandelbrot.mapPixelToComplexCoord(newx1, world.width, world.minR, world.maxR),
+                i1 = mandelbrot.mapPixelToComplexCoord(newy1, world.height, world.minI, world.maxI),
+                r2 = mandelbrot.mapPixelToComplexCoord(newx2, world.width, world.minR, world.maxR),
+                i2 = mandelbrot.mapPixelToComplexCoord(newy2, world.height, world.minI, world.maxI);
 
             if (r1 > r2) {
                 world.maxR = r1;
@@ -253,17 +259,14 @@
 
 
         // draw the full set
-        require(['mandelbrot'], function(mandelbrot) {
+        var ctx = $('#c')[0].getContext('2d'),
+            imgData = ctx.createImageData(world.width,world.height);
 
-          var ctx = $('#c')[0].getContext('2d'),
-              imgData = ctx.createImageData(world.width,world.height);
+        mandelbrot.compute(world, 
+          function(x,y,rgbArr) { drawToImageData(imgData.data, world.width, x, y, rgbArr); },
+          setColorGrayscale);
 
-          mandelbrot.compute(world, 
-            function(x,y,rgbArr) { drawToImageData(imgData.data, world.width, x, y, rgbArr); },
-            setColorGrayscale);
-
-          ctx.putImageData(imgData, 0, 0);
-        });
+        ctx.putImageData(imgData, 0, 0);
 
       </script>
   </body>
