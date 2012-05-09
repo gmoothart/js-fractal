@@ -22,6 +22,5 @@ h1. Todo
 * draw Mandelbrot set off the UI thread, so it does not block loading of the whole page
 * dashed selection line
 * change mandelbrot code to spit out data that can be drawn to a canvas, instead of drawing directly to the canvas.
-* show coordinates on mouseover
 * fix mapping functions to not invert the y-axis
 * draw Julia set more accurately, cf. wikipedia

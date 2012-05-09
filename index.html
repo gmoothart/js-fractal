@@ -77,7 +77,13 @@
                       isDragging = false;
                   },
                   'mousemove.selection': function(ev) {
+                      var startR, startI,
+                          currR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
+                          currI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
+
                       if (isDragging) {
+                          startR = mandelbrot.mapPixelToComplexCoord(rectXStart, world.width, world.minR, world.maxR);
+                          startI = mandelbrot.mapPixelToComplexCoord(rectYStart, world.height, world.minI, world.maxI);
                           rectXEnd = ev.offsetX;
 
                           // constrain selection to canvas aspect ration
@@ -99,12 +105,12 @@
                           overlayCtx.stroke();
 
                           // show selection region
+                          $('#coordspan').text('(' + startR + ', ' + startI + ') to (' + currR + ', ' + currI + ')');
 
                       }
                       else {
                           // show current point
-
-
+                          $('#coordspan').text('(' + currR + ', ' + currI + ')');
                       }
                   }
               },
