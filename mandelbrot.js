@@ -13,13 +13,22 @@
             compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); }, 
             drawFn, colorFn); 
         },
-        mapPixelToComplexCoord: mapPixelToComplexCoord,
+        xy_to_ri: xy_to_ri,
         mapComplexCoordToPixel: mapComplexCoordToPixel
     };
 
-    function mapPixelToComplexCoord(p, canvasWidth, minC, maxC) {
-        var step = Math.abs(maxC - minC) / canvasWidth;
-        return p * step + minC
+    function xy_to_ri(x, y, world) {
+        var rstep = Math.abs(world.maxR - world.minR) / world.width;
+        var istep = Math.abs(world.maxI - world.minI) / world.height;
+
+        return {
+          r: (x * rstep) + world.minR,
+          i: world.maxI - (y * istep)
+        }
+    }
+
+    function ri_to_xy(r, i, world) {
+
     }
 
     function mapComplexCoordToPixel(c, canvasWidth, minC, maxC) {
@@ -32,7 +41,7 @@
     function compute(world, divergeFn, drawFn, colorFn) {
         var w = world.width,
             h = world.height,
-            x,y,r,i,
+            x,y,p,
             iter,
             pos,
             rgbArr,
@@ -40,16 +49,14 @@
 
         // draw set
         for(x=0; x<w; x++) {
-            r = mapPixelToComplexCoord(x, w, world.minR, world.maxR);
-
             for(y=0; y<h; y++) {
 
                 // convert pixel x,y to coordinate on the complex plane
-                i = mapPixelToComplexCoord(y, h, world.minI, world.maxI);
+                p = xy_to_ri(x, y, world)
                 
                 // number of iterations before divergence
                 // Julia set starts out at 
-                iter = divergeFn(r, i, maxIter);
+                iter = divergeFn(p.r, p.i, maxIter);
 
                 rgbArr = colorFn(iter, maxIter);
                 drawFn(x, y, rgbArr);

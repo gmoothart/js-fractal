@@ -77,13 +77,11 @@
                       isDragging = false;
                   },
                   'mousemove.selection': function(ev) {
-                      var startR, startI,
-                          currR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
-                          currI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
+                      var startP,
+                          currP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world)
 
                       if (isDragging) {
-                          startR = mandelbrot.mapPixelToComplexCoord(rectXStart, world.width, world.minR, world.maxR);
-                          startI = mandelbrot.mapPixelToComplexCoord(rectYStart, world.height, world.minI, world.maxI);
+                          startP = mandelbrot.xy_to_ri(rectXStart, rectYStart, world);
                           rectXEnd = ev.offsetX;
 
                           // constrain selection to canvas aspect ration
@@ -105,12 +103,12 @@
                           overlayCtx.stroke();
 
                           // show selection region
-                          $('#coordspan').text('(' + startR + ', ' + startI + ') to (' + currR + ', ' + currI + ')');
+                          $('#coordspan').text('(' + startP.r + ', ' + startP.i + ') to (' + currP.r + ', ' + currP.i + ')');
 
                       }
                       else {
                           // show current point
-                          $('#coordspan').text('(' + currR + ', ' + currI + ')');
+                          $('#coordspan').text('(' + currP.r + ', ' + currP.i + ')');
                       }
                   }
               },
@@ -119,17 +117,16 @@
 
                       var ctx,
                           imgData,
-                          startR = mandelbrot.mapPixelToComplexCoord(ev.offsetX, world.width, world.minR, world.maxR),
-                          startI = mandelbrot.mapPixelToComplexCoord(ev.offsetY, world.height, world.minI, world.maxI);
+                          startP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world)
 
 
-                      console.log('draw overlay at (' + startR + ',' + startI + ')');
+                      console.log('draw overlay at (' + startP.r + ',' + startP.i + ')');
 
                       ctx = $('#c')[0].getContext('2d'),
                       imgData = ctx.createImageData(previewWorld.width, previewWorld.height);
 
                       // show julia preview
-                      mandelbrot.computeJulia(previewWorld, startR, startI,
+                      mandelbrot.computeJulia(previewWorld, startP.r, startP.i,
                         function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
                         invertColors(setColorGrayscale));
 
@@ -202,27 +199,25 @@
           });
 
         function updateWorld(newx1, newy1, newx2, newy2) {
-            var r1 = mandelbrot.mapPixelToComplexCoord(newx1, world.width, world.minR, world.maxR),
-                i1 = mandelbrot.mapPixelToComplexCoord(newy1, world.height, world.minI, world.maxI),
-                r2 = mandelbrot.mapPixelToComplexCoord(newx2, world.width, world.minR, world.maxR),
-                i2 = mandelbrot.mapPixelToComplexCoord(newy2, world.height, world.minI, world.maxI);
+            var p1 = mandelbrot.xy_to_ri(newx1, newy1, world),
+                p2 = mandelbrot.xy_to_ri(newx2, newy2, world)
 
-            if (r1 > r2) {
-                world.maxR = r1;
-                world.minR = r2;
+            if (p1.r > p2.r) {
+                world.maxR = p1.r;
+                world.minR = p2.r;
             }
             else {
-                world.maxR = r2;
-                world.minR = r1;
+                world.maxR = p2.r;
+                world.minR = p1.r;
             }
 
-            if (i1 > i2) {
-                world.minI = i2;
-                world.maxI = i1;
+            if (p1.i > p2.i) {
+                world.minI = p2.i;
+                world.maxI = p1.i;
             }
             else {
-                world.minI = i1;
-                world.maxI = i2;
+                world.minI = p1.i;
+                world.maxI = p2.i;
             }
         }
 
