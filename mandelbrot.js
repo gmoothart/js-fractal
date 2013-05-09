@@ -13,13 +13,12 @@
             compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); }, 
             drawFn, colorFn); 
         },
-        xy_to_ri: xy_to_ri,
-        mapComplexCoordToPixel: mapComplexCoordToPixel
+        xy_to_ri: xy_to_ri
     };
 
     function xy_to_ri(x, y, world) {
-        var rstep = Math.abs(world.maxR - world.minR) / world.width;
-        var istep = Math.abs(world.maxI - world.minI) / world.height;
+        var rstep = Math.abs(world.maxR - world.minR) / world.width,
+            istep = Math.abs(world.maxI - world.minI) / world.height;
 
         return {
           r: (x * rstep) + world.minR,
@@ -28,7 +27,13 @@
     }
 
     function ri_to_xy(r, i, world) {
+        var xstep = Math.abs(world.maxR - world.minR) / world.width;
+        var ystep = Math.abs(world.maxI - world.minI) / world.height;
 
+        return {
+          x: (r - world.minR) / step,
+          y: (world.maxI - i) / step
+        }
     }
 
     function mapComplexCoordToPixel(c, canvasWidth, minC, maxC) {
@@ -52,10 +57,10 @@
             for(y=0; y<h; y++) {
 
                 // convert pixel x,y to coordinate on the complex plane
+                // could be slightly more efficient by computing r in the outer loop
                 p = xy_to_ri(x, y, world)
                 
                 // number of iterations before divergence
-                // Julia set starts out at 
                 iter = divergeFn(p.r, p.i, maxIter);
 
                 rgbArr = colorFn(iter, maxIter);
@@ -75,7 +80,7 @@
         for(i=0; i < maxIter; i++) {
             // z = z^2 + c
             tmpR = zR*zR - zI*zI;
-            tmpI = 2*zR*zI; // should be 2 * zR * zI ???
+            tmpI = 2*zR*zI;
             zR = tmpR + cR;
             zI = tmpI + cI;
 
