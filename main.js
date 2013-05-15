@@ -138,16 +138,6 @@
         };
     }
 
-    function drawToImageData(pixelArr, width, x, y, rgbArr) {
-
-          var pos = (y*width + x) * 4;
-
-          pixelArr[pos + 0] = rgbArr[0]; // R
-          pixelArr[pos + 1] = rgbArr[1]; // G
-          pixelArr[pos + 2] = rgbArr[2]; // B
-          pixelArr[pos + 3] = rgbArr[3]; // Alpha
-    }
-
     function drawSelectionRect(offsetX, offsetY) {
         var startP,
             currP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
@@ -185,29 +175,25 @@
     }
 
     function drawJuliaPreview(offsetX, offsetY) {
-        var ctx,
-            imgData,
+        var ctx, imgData, result,
             startP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
 
 
         console.info('draw overlay at (' + startP.r + ',' + startP.i + ')');
 
         imgData = overlayCtx.createImageData(previewWorld.width, previewWorld.height);
-
-        mandelbrot.computeJulia(previewWorld, startP.r, startP.i,
-            function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
-            invertColors(setColorGrayscale));
-
+        result = mandelbrot.computeJulia(previewWorld, startP.r, startP.i, invertColors(setColorGrayscale));
+        imgData.data.set(result);
         overlayCtx.putImageData(imgData, 0, 0);
     }
 
     function compute(w) {
         var ctx = $('#c')[0].getContext('2d'),
-            imgData = ctx.createImageData(w.width, w.height);
+            imgData = ctx.createImageData(w.width, w.height),
+            x, y, result;
 
-        mandelbrot.compute(w,
-          function(x,y,rgbArr) { drawToImageData(imgData.data, w.width, x, y, rgbArr); },
-          setColorGrayscale);
+        result = mandelbrot.compute(w, setColorGrayscale);
+        imgData.data.set(result);
 
         ctx.putImageData(imgData, 0, 0);
     }

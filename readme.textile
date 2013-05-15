@@ -21,13 +21,5 @@ h1. Todo
 * add "slow-mo" view, to show the Mandelbrot set being constructed one iteration at a time.
 * draw Mandelbrot set off the UI thread, so it does not block loading of the whole page
 * dashed selection line
-* change mandelbrot code to spit out data that can be drawn to a canvas, instead of drawing directly to the canvas.
 * draw Julia set more accurately, cf. wikipedia
 * clean up index.html, move most presentation logic to another file.
-
-h1. Thoughts
-
-I would like to be able to easily shift computation to web workers, and also show the whole set at a particular 
-iteration, for slo-mo or similar. What is the best way to do that? We'd need the functions to take in a state and 
-return another one.
-

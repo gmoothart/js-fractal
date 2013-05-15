@@ -4,14 +4,14 @@
 
     // public signature
     window.mandelbrot = {
-        compute: function(world, drawFn, colorFn) { 
-            compute(world, function(r,i,maxIter){ return diverges(r,i,0,0,maxIter); }, 
-            drawFn, colorFn); 
+        compute: function(world, colorFn) {
+            return compute(world, function(r,i,maxIter){ return diverges(r,i,0,0,maxIter); },
+                colorFn);
         },
         // todo: can generate more accurately, cf. wikipedia
-        computeJulia: function(world, startR, startI, drawFn, colorFn) { 
-            compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); }, 
-            drawFn, colorFn); 
+        computeJulia: function(world, startR, startI, colorFn) {
+            return compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); },
+                colorFn);
         },
         xy_to_ri: xy_to_ri
     };
@@ -43,13 +43,14 @@
 
 
     // computes a julia or mandelbrot set, based on divergeFn
-    function compute(world, divergeFn, drawFn, colorFn) {
+    function compute(world, divergeFn, colorFn) {
         var w = world.width,
             h = world.height,
             x,y,p,
             iter,
             pos,
             rgbArr,
+            result = new Uint8ClampedArray(4 * h * w),
             maxIter = 100;
 
         // draw set
@@ -62,11 +63,16 @@
                 
                 // number of iterations before divergence
                 iter = divergeFn(p.r, p.i, maxIter);
-
                 rgbArr = colorFn(iter, maxIter);
-                drawFn(x, y, rgbArr);
+                var pos = (y*w + x) * 4;
+                result[pos + 0] = rgbArr[0];
+                result[pos + 1] = rgbArr[1];
+                result[pos + 2] = rgbArr[2];
+                result[pos + 3] = rgbArr[3];
             }
         }
+
+        return result;
     }
 
     // iterate over z = z^2 + c `maxIter` times
