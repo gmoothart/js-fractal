@@ -32,60 +32,12 @@
                 isDragging = false;
             },
             'mousemove.selection': function(ev) {
-                var startP,
-                    currP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world)
-
-                if (isDragging) {
-                    startP = mandelbrot.xy_to_ri(rectXStart, rectYStart, world);
-                    rectXEnd = ev.offsetX;
-
-                    // constrain selection to canvas aspect ration
-                    if (ev.offsetY > rectYStart) {
-                      rectYEnd = rectYStart + 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-                    }
-                    else {
-                      rectYEnd = rectYStart - 3*(Math.abs(rectXStart - ev.offsetX)) / 4;
-                    }
-
-                    overlayCtx.clearRect(0,0,world.width, world.height);
-                    overlayCtx.strokeStyle = '#6699ff';
-                    overlayCtx.beginPath();
-                    overlayCtx.moveTo(rectXStart, rectYStart);
-                    overlayCtx.lineTo(rectXStart, rectYEnd);
-                    overlayCtx.lineTo(rectXEnd, rectYEnd);
-                    overlayCtx.lineTo(rectXEnd, rectYStart);
-                    overlayCtx.lineTo(rectXStart, rectYStart);
-                    overlayCtx.stroke();
-
-                    // show selection region
-                    $('#coordspan').text('(' + startP.r + ', ' + startP.i + ') to (' + currP.r + ', ' + currP.i + ')');
-
-                }
-                else {
-                    // show current point
-                    $('#coordspan').text('(' + currP.r + ', ' + currP.i + ')');
-                }
+                drawSelectionRect(ev.offsetX, ev.offsetY);
             }
         },
         juliaOverlayEvents = {
             'mousemove.juliaOverlay': function(ev) {
-
-                var ctx,
-                    imgData,
-                    startP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world)
-
-
-                console.log('draw overlay at (' + startP.r + ',' + startP.i + ')');
-
-                ctx = $('#c')[0].getContext('2d'),
-                imgData = ctx.createImageData(previewWorld.width, previewWorld.height);
-
-                // show julia preview
-                mandelbrot.computeJulia(previewWorld, startP.r, startP.i,
-                  function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
-                  invertColors(setColorGrayscale));
-
-                ctx.putImageData(imgData, 0, 0);
+                drawJuliaPreview(ev.offsetX, ev.offsetY);
             },
             'click.juliaOverlay': function(ev) {
                 // switch to Julia set
@@ -102,15 +54,7 @@
 
         updateWorld(rectXStart, rectYStart, rectXEnd, rectYEnd);
 
-        ctx = $('#c')[0].getContext('2d'),
-        imgData = ctx.createImageData(world.width,world.height);
-
-
-        mandelbrot.compute(world, 
-          function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
-          setColorGrayscale);
-
-        ctx.putImageData(imgData, 0, 0);
+        compute(world);
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -121,16 +65,7 @@
             imgData;
 
         resetWorld();
-
-        ctx = $('#c')[0].getContext('2d'),
-        imgData = ctx.createImageData(world.width,world.height);
-
-
-        mandelbrot.compute(world, 
-          function(x,y,rgbArr) { drawToImageData(imgData.data,world.width,x,y,rgbArr); },
-          setColorGrayscale);
-
-        ctx.putImageData(imgData, 0, 0);
+        compute(world);
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -149,7 +84,7 @@
         }
         else {
             overlay.on(selectionEvents);
-            overlay.off('.juliaOveraly');
+            overlay.off('.juliaOverlay');
         }
     });
 
@@ -213,14 +148,71 @@
           pixelArr[pos + 3] = rgbArr[3]; // Alpha
     }
 
+    function drawSelectionRect(offsetX, offsetY) {
+        var startP,
+            currP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
+
+        if (isDragging) {
+            startP = mandelbrot.xy_to_ri(rectXStart, rectYStart, world);
+            rectXEnd = offsetX;
+
+            // constrain selection to canvas aspect ration
+            if (offsetY > rectYStart) {
+              rectYEnd = rectYStart + 3*(Math.abs(rectXStart - offsetX)) / 4;
+            }
+            else {
+              rectYEnd = rectYStart - 3*(Math.abs(rectXStart - offsetX)) / 4;
+            }
+
+            overlayCtx.clearRect(0,0,world.width, world.height);
+            overlayCtx.strokeStyle = '#6699ff';
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(rectXStart, rectYStart);
+            overlayCtx.lineTo(rectXStart, rectYEnd);
+            overlayCtx.lineTo(rectXEnd, rectYEnd);
+            overlayCtx.lineTo(rectXEnd, rectYStart);
+            overlayCtx.lineTo(rectXStart, rectYStart);
+            overlayCtx.stroke();
+
+            // show selection region
+            $('#coordspan').text('(' + startP.r + ', ' + startP.i + ') to (' + currP.r + ', ' + currP.i + ')');
+
+        }
+        else {
+            // show current point
+            $('#coordspan').text('(' + currP.r + ', ' + currP.i + ')');
+        }
+    }
+
+    function drawJuliaPreview(offsetX, offsetY) {
+        var ctx,
+            imgData,
+            startP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
+
+
+        console.info('draw overlay at (' + startP.r + ',' + startP.i + ')');
+
+        imgData = overlayCtx.createImageData(previewWorld.width, previewWorld.height);
+
+        mandelbrot.computeJulia(previewWorld, startP.r, startP.i,
+            function(x,y,rgbArr) { drawToImageData(imgData.data,previewWorld.width,x,y,rgbArr); },
+            invertColors(setColorGrayscale));
+
+        overlayCtx.putImageData(imgData, 0, 0);
+    }
+
+    function compute(w) {
+        var ctx = $('#c')[0].getContext('2d'),
+            imgData = ctx.createImageData(w.width, w.height);
+
+        mandelbrot.compute(w,
+          function(x,y,rgbArr) { drawToImageData(imgData.data, w.width, x, y, rgbArr); },
+          setColorGrayscale);
+
+        ctx.putImageData(imgData, 0, 0);
+    }
+
 
     // draw the full set
-    var ctx = $('#c')[0].getContext('2d'),
-        imgData = ctx.createImageData(world.width,world.height);
-
-    mandelbrot.compute(world, 
-      function(x,y,rgbArr) { drawToImageData(imgData.data, world.width, x, y, rgbArr); },
-      setColorGrayscale);
-
-    ctx.putImageData(imgData, 0, 0);
+    compute(world);
 })();
