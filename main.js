@@ -17,7 +17,7 @@
             maxR: 1.5,
             minI: -1.5,
             maxI: 1.5,
-            maxIter: 100,
+            maxIter: 50,
         },
         overlayCtx = overlay[0].getContext('2d'),
         isDragging = false,
@@ -52,7 +52,7 @@
     $('#mandelZoom').on('click', function(ev) {
         updateWorld(rectXStart, rectYStart, rectXEnd, rectYEnd);
 
-        compute(world);
+        compute();
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -65,7 +65,7 @@
         else {
             world.maxIter += 100;
         }
-        compute(world);
+        compute();
     });
 
     $('#mandelBlur').on('click', function(ev) {
@@ -75,12 +75,12 @@
         else {
           world.maxIter -= 100;
         }
-        compute(world);
+        compute();
     });
 
     $('#mandelReset').on('click', function(ev) {
         resetWorld();
-        compute(world);
+        compute();
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -179,24 +179,47 @@
             startP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
 
         imgData = overlayCtx.createImageData(previewWorld.width, previewWorld.height);
-        result = mandelbrot.computeJulia(previewWorld, startP.r, startP.i, colors.invert(colors.grayscale));
+        result = mandelbrot.computeJulia(previewWorld, startP.r, startP.i, colors.invert(colors.selected));
         imgData.data.set(result);
         overlayCtx.putImageData(imgData, 0, 0);
     }
 
-    function compute(w) {
-        var ctx = $('#c')[0].getContext('2d'),
+    function compute(_w, _ctx, _colorScheme) {
+        var w = _w || world,
+            ctx = _ctx || $('#c')[0].getContext('2d'),
+            colorScheme = _colorScheme || colors.selected,
             imgData = ctx.createImageData(w.width, w.height),
             x, y, result;
 
-        console.info("iteration count " + world.maxIter);
-        result = mandelbrot.compute(w, colors.grayscale);
+        result = mandelbrot.compute(w, colorScheme);
         imgData.data.set(result);
 
         ctx.putImageData(imgData, 0, 0);
     }
 
+    function drawColorPreviews() {
+        var sidebar = $('#sidebar');
+
+        $.each(colors.schemes, function(index, scheme) {
+            var c = $('<canvas class="scheme"></canvas>'),
+                ctx = c[0].getContext('2d');
+
+            ctx.canvas.width = previewWorld.width;
+            ctx.canvas.height = previewWorld.height;
+
+            c.on('click', function(ev) {
+                // change current color scheme on click
+                colors.selected = scheme;
+                compute();
+            });
+
+            compute(previewWorld, ctx, scheme);
+            sidebar.append(c)
+        });
+    }
+
 
     // draw the full set
-    compute(world);
+    compute();
+    drawColorPreviews();
 })();

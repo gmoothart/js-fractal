@@ -13,6 +13,11 @@
       .crosshair{
         cursor: crosshair;
       }
+
+      .scheme {
+        cursor: pointer;
+        padding-left: 10px;
+      }
     </style>
   </head>
   <body>
@@ -30,12 +35,12 @@
         </fieldset>
       </div>
       <div class="clear"></div>
-      <div class="grid_11" style="height:600px;">
+      <div class="grid_10" style="height:600px;">
         <canvas id="c" width=800 height="600" style="position:absolute;z-index:0" ></canvas>
         <canvas id="overlayCanvas" width=800 height="600" style="position:absolute;z-index:1" ></canvas>
       </div>
-      <div class="grid_1">
-          <!-- Placeholder for fractal menu -->
+      <div id="sidebar" class="grid_2">
+        <h3>Color Schemes</h3>
       </div>
       <div class="clear"></div>
       <div>
