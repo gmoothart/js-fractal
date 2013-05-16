@@ -10,17 +10,14 @@ h1. Todo
 * use web workers with Transferable objects to speed it up even more (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
 * profile optimal number of workers
 * color scheme(s)
-* allow adjusting of iterations (or do it automatically on zoom?)
 * switch to use BigDecimal intelligently when zooming in and numbers become close together
 * animated transitions??
 * more fractals! 3d fractals?
 * use pushState() to track zoom level and allow history navigation.
 * I think we can speed up the selection-drawing by only doing a clearRect() on the region we
   need to. That should eliminate the gap between mouse and rectangle when dragging.
-* turn off rectangle-selection when the julia-overlay is on
 * add "slow-mo" view, to show the Mandelbrot set being constructed one iteration at a time.
 * draw Mandelbrot set off the UI thread, so it does not block loading of the whole page
 * dashed selection line
 * draw Julia set more accurately, cf. wikipedia
-* clean up index.html, move most presentation logic to another file.
 * do not do colorization in compute(), so that it is possible to change color schemes without re-computing

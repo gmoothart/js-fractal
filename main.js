@@ -59,7 +59,22 @@
     });
 
     $('#mandelSharpen').on('click', function(ev) {
-        world.maxIter += 100;
+        if (world.maxIter < 100) {
+            world.maxIter = 100;
+        }
+        else {
+            world.maxIter += 100;
+        }
+        compute(world);
+    });
+
+    $('#mandelBlur').on('click', function(ev) {
+        if (world.maxIter <= 100) {
+            world.maxIter -= Math.floor(world.maxIter / 2);
+        }
+        else {
+          world.maxIter -= 100;
+        }
         compute(world);
     });
 
