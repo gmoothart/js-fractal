@@ -123,18 +123,24 @@
         var norm = Math.floor(255 * iter/maxIter);
 
         // simple, just scale smoothly from white to black
-        return [norm, norm, norm, 255];
+        return {
+          r: norm,
+          g: norm,
+          b: norm,
+          a: 255
+        }
     }
 
     function invertColors(colorFn) {
         return function(iter,maxIter) {
-            var a = colorFn(iter,maxIter);
+            var c = colorFn(iter,maxIter);
 
-            a[0] = 255-a[0];
-            a[1] = 255-a[1];
-            a[2] = 255-a[2];
-
-            return a;
+            return {
+              r: 255 - c.r,
+              b: 255 - c.b,
+              g: 255 - c.g,
+              a: c.a
+            }
         };
     }
 

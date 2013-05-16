@@ -49,7 +49,7 @@
             x,y,p,
             iter,
             pos,
-            rgbArr,
+            c,
             result = new Uint8ClampedArray(4 * h * w),
             maxIter = 100;
 
@@ -63,12 +63,12 @@
                 
                 // number of iterations before divergence
                 iter = divergeFn(p.r, p.i, maxIter);
-                rgbArr = colorFn(iter, maxIter);
+                c = colorFn(iter, maxIter);
                 var pos = (y*w + x) * 4;
-                result[pos + 0] = rgbArr[0];
-                result[pos + 1] = rgbArr[1];
-                result[pos + 2] = rgbArr[2];
-                result[pos + 3] = rgbArr[3];
+                result[pos + 0] = c.r;
+                result[pos + 1] = c.g;
+                result[pos + 2] = c.b;
+                result[pos + 3] = c.a;
             }
         }
 
