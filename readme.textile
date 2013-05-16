@@ -23,3 +23,4 @@ h1. Todo
 * dashed selection line
 * draw Julia set more accurately, cf. wikipedia
 * clean up index.html, move most presentation logic to another file.
+* do not do colorization in compute(), so that it is possible to change color schemes without re-computing

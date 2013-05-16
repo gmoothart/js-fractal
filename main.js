@@ -8,6 +8,7 @@
             maxR: 1.5,
             minI: -1.5,
             maxI: 1.5,
+            maxIter: 100,
         },
         previewWorld = {
             width: 120,
@@ -16,6 +17,7 @@
             maxR: 1.5,
             minI: -1.5,
             maxI: 1.5,
+            maxIter: 100,
         },
         overlayCtx = overlay[0].getContext('2d'),
         isDragging = false,
@@ -48,10 +50,6 @@
 
     overlay.on(selectionEvents);
     $('#mandelZoom').on('click', function(ev) {
-
-        var ctx,
-            imgData;
-
         updateWorld(rectXStart, rectYStart, rectXEnd, rectYEnd);
 
         compute(world);
@@ -60,10 +58,12 @@
         overlayCtx.clearRect(0,0,world.width,world.height);
     });
 
-    $('#mandelReset').on('click', function(ev) {
-        var ctx,
-            imgData;
+    $('#mandelSharpen').on('click', function(ev) {
+        world.maxIter += 100;
+        compute(world);
+    });
 
+    $('#mandelReset').on('click', function(ev) {
         resetWorld();
         compute(world);
 
@@ -109,6 +109,9 @@
             world.minI = p1.i;
             world.maxI = p2.i;
         }
+
+        // crude method for sharpening image as we zoom in
+        world.maxIter += 100;
     }
 
     function resetWorld() {
@@ -116,8 +119,9 @@
         world.maxR = 1.5;
         world.minI = -1.5;
         world.maxI = 1.5;
-    }
 
+        world.maxIter = 100;
+    }
 
     function drawSelectionRect(offsetX, offsetY) {
         var startP,
@@ -156,11 +160,8 @@
     }
 
     function drawJuliaPreview(offsetX, offsetY) {
-        var ctx, imgData, result,
+        var imgData, result,
             startP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
-
-
-        console.info('draw overlay at (' + startP.r + ',' + startP.i + ')');
 
         imgData = overlayCtx.createImageData(previewWorld.width, previewWorld.height);
         result = mandelbrot.computeJulia(previewWorld, startP.r, startP.i, colors.invert(colors.grayscale));
@@ -173,6 +174,7 @@
             imgData = ctx.createImageData(w.width, w.height),
             x, y, result;
 
+        console.info("iteration count " + world.maxIter);
         result = mandelbrot.compute(w, colors.grayscale);
         imgData.data.set(result);
 

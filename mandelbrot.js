@@ -50,8 +50,7 @@
             iter,
             pos,
             c,
-            result = new Uint8ClampedArray(4 * h * w),
-            maxIter = 100;
+            result = new Uint8ClampedArray(4 * h * w);
 
         // draw set
         for(x=0; x<w; x++) {
@@ -62,8 +61,8 @@
                 p = xy_to_ri(x, y, world)
                 
                 // number of iterations before divergence
-                iter = divergeFn(p.r, p.i, maxIter);
-                c = colorFn(iter, maxIter);
+                iter = divergeFn(p.r, p.i, world.maxIter);
+                c = colorFn(iter, world.maxIter);
                 var pos = (y*w + x) * 4;
                 result[pos + 0] = c.r;
                 result[pos + 1] = c.g;
