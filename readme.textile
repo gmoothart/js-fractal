@@ -5,11 +5,10 @@ Experimentations with modern browsers, html5, performance, and the beauty of fra
 
 h1. Todo
 
-* show julia set on mouseover in a preview window, switch between Mandelbrot and julia sets easily
-* use web workers with ArrayBuffer to speed it up (http://updates.html5rocks.com/2011/09/Workers-ArrayBuffer)
-* use web workers with Transferable objects to speed it up even more (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
+* switch between Mandelbrot and julia sets easily
+* use web workers with Transferable objects to speed it up (http://updates.html5rocks.com/2011/12/Transferable-Objects-Lightning-Fast)
 * profile optimal number of workers
-* color scheme(s)
+* add pretty color schemes
 * switch to use BigDecimal intelligently when zooming in and numbers become close together
 * animated transitions??
 * more fractals! 3d fractals?
@@ -21,3 +20,5 @@ h1. Todo
 * dashed selection line
 * draw Julia set more accurately, cf. wikipedia
 * do not do colorization in compute(), so that it is possible to change color schemes without re-computing
+* fix rectangle-drawing code, sometimes it 'sticks' and does not work
+* make zoom do something sensible when there is no selection

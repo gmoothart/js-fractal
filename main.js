@@ -103,6 +103,11 @@
         }
     });
 
+    $('#invertColors').on('change', function(ev) {
+      var invert = $(ev.currentTarget).is(':checked');
+      drawColorPreviews(invert);
+    });
+
     function updateWorld(newx1, newy1, newx2, newy2) {
         var p1 = mandelbrot.xy_to_ri(newx1, newy1, world),
             p2 = mandelbrot.xy_to_ri(newx2, newy2, world)
@@ -197,12 +202,16 @@
         ctx.putImageData(imgData, 0, 0);
     }
 
-    function drawColorPreviews() {
+    function drawColorPreviews(invert) {
         var sidebar = $('#sidebar');
 
-        $.each(colors.schemes, function(index, scheme) {
+        // clean up if necessary
+        $('#sidebar canvas').remove();
+
+        $.each(colors.schemes, function(index, _scheme) {
             var c = $('<canvas class="scheme"></canvas>'),
-                ctx = c[0].getContext('2d');
+                ctx = c[0].getContext('2d'),
+                scheme = invert ? colors.invert(_scheme) : _scheme;
 
             ctx.canvas.width = previewWorld.width;
             ctx.canvas.height = previewWorld.height;
