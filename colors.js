@@ -2,8 +2,8 @@
     "use strict";
 
     function invertColors(colorFn) {
-        return function(iter,maxIter) {
-            var c = colorFn(iter,maxIter);
+        return function(iter,maxIter,magnitude) {
+            var c = colorFn(iter,maxIter,magnitude);
 
             return {
               r: 255 - c.r,
@@ -39,6 +39,28 @@
               a: 255,
             };
         },
+
+        /*
+         * inspired by http://preshing.com/20110926/high-resolution-mandelbrot-in-obfuscated-python/,
+         * but for some reason it doesn't come out right
+        function(iter, maxIter, magnitude) {
+            var mag = Math.pow(magnitude, 1);
+            var norm = (2 + iter - Math.pow(4*Math.abs(mag), -0.4))/maxIter;
+            if (iter == maxIter) norm=0;
+
+            if (norm >= 1) {
+                console.log("ut oh");
+            }
+
+            return {
+                r: norm*80 + Math.pow(norm, 9) *255-950 * Math.pow(norm,99),
+                g: norm*70-880*Math.pow(norm,18)+701* Math.pow(norm,9),
+                b: norm*Math.pow(255,(1-Math.pow(norm,45)*2)),
+                a: 255,
+            };
+
+        }
+        */
 
     ];
 

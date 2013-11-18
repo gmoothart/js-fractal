@@ -47,9 +47,8 @@
         var w = world.width,
             h = world.height,
             x,y,p,
-            iter,
             pos,
-            c,
+            c, d,
             result = new Uint8ClampedArray(4 * h * w);
 
         // draw set
@@ -61,8 +60,8 @@
                 p = xy_to_ri(x, y, world)
                 
                 // number of iterations before divergence
-                iter = divergeFn(p.r, p.i, world.maxIter);
-                c = colorFn(iter, world.maxIter);
+                d = divergeFn(p.r, p.i, world.maxIter);
+                c = colorFn(d.iterations, world.maxIter, d.magnitude);
                 var pos = (y*w + x) * 4;
                 result[pos + 0] = c.r;
                 result[pos + 1] = c.g;
@@ -91,9 +90,9 @@
 
             magnitude = Math.sqrt( zR*zR + zI*zI );
 
-            if (magnitude > 2) break;
+            if (magnitude > threshold) break;
         }
 
-        return i;
+        return { iterations: i, magnitude: magnitude };
     }
 })();

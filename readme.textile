@@ -22,3 +22,4 @@ h1. Todo
 * do not do colorization in compute(), so that it is possible to change color schemes without re-computing
 * fix rectangle-drawing code, sometimes it 'sticks' and does not work
 * make zoom do something sensible when there is no selection
+* show a 'waiting' cursor on blur/sharpen/etc., so it is obvious when done.
