@@ -1,7 +1,8 @@
 (function() {
     "use strict";
     var overlay = $('#overlayCanvas'),
-        world = {
+        overlayCtx = overlay[0].getContext('2d'),
+        world = createWorld({
             width: overlay.width(),
             height: overlay.height(),
             minR: -2.5,
@@ -9,8 +10,11 @@
             minI: -1.5,
             maxI: 1.5,
             maxIter: 100,
-        },
-        previewWorld = {
+            computeFn: mandelbrot.compute,
+            drawContext: $('#c')[0].getContext('2d'),
+            colorFn: colors.selected,
+        }),
+        previewWorld = createWorld({
             width: 120,
             height: 90,
             minR: -2.5,
@@ -18,8 +22,12 @@
             minI: -1.5,
             maxI: 1.5,
             maxIter: 50,
-        },
-        overlayCtx = overlay[0].getContext('2d'),
+            computeFn: mandelbrot.computeJulia,
+            drawContext: overlayCtx,
+            colorFn: function() {
+                return colors.invert(world.colorFn).apply(this, arguments);
+            },
+        }),
         isDragging = false,
         rectXStart, rectYStart,
         rectXEnd, rectYEnd,
@@ -39,20 +47,32 @@
         },
         juliaOverlayEvents = {
             'mousemove.juliaOverlay': function(ev) {
-                drawJuliaPreview(ev.offsetX, ev.offsetY);
+
+                // must initialize julia-set-specific point
+                var startP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world);
+                previewWorld.startI = startP.i;
+                previewWorld.startR = startP.r;
+
+                previewWorld.draw();
             },
             'click.juliaOverlay': function(ev) {
                 // switch to Julia set
-                Julia.draw(ev.offsetX, ev.offsetY);
+                console.log("drawing julia set...");
 
+                world.computeFn = mandelbrot.computeJulia;
+                var startP = mandelbrot.xy_to_ri(ev.offsetX, ev.offsetY, world);
+                world.startI = startP.i;
+                world.startR = startP.r;
+
+                world.draw();
             }
         }
 
     overlay.on(selectionEvents);
     $('#mandelZoom').on('click', function(ev) {
-        updateWorld(rectXStart, rectYStart, rectXEnd, rectYEnd);
+        world.update(rectXStart, rectYStart, rectXEnd, rectYEnd);
 
-        compute();
+        world.draw();
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -65,7 +85,7 @@
         else {
             world.maxIter += 100;
         }
-        compute();
+        world.draw();
     });
 
     $('#mandelBlur').on('click', function(ev) {
@@ -75,12 +95,13 @@
         else {
           world.maxIter -= 100;
         }
-        compute();
+        world.draw();
     });
 
     $('#mandelReset').on('click', function(ev) {
-        resetWorld();
-        compute();
+        world.reset();
+        world.computeFn = mandelbrot.compute;
+        world.draw();
 
         // clear selection box
         overlayCtx.clearRect(0,0,world.width,world.height);
@@ -108,39 +129,72 @@
       drawColorPreviews(invert);
     });
 
-    function updateWorld(newx1, newy1, newx2, newy2) {
-        var p1 = mandelbrot.xy_to_ri(newx1, newy1, world),
-            p2 = mandelbrot.xy_to_ri(newx2, newy2, world)
+    function createWorld(p) {
 
-        if (p1.r > p2.r) {
-            world.maxR = p1.r;
-            world.minR = p2.r;
-        }
-        else {
-            world.maxR = p2.r;
-            world.minR = p1.r;
-        }
+        var origMinR = p.minR,
+            origMaxR = p.maxR,
+            origMinI = p.minI,
+            origMaxI = p.maxI;
 
-        if (p1.i > p2.i) {
-            world.minI = p2.i;
-            world.maxI = p1.i;
-        }
-        else {
-            world.minI = p1.i;
-            world.maxI = p2.i;
-        }
+        return {
+            drawContext: p.drawContext,
+            computeFn: p.computeFn,
+            width: p.width,
+            height: p.height,
+            minR: p.minR,
+            maxR: p.maxR,
+            minI: p.minI,
+            maxI: p.maxI,
+            maxIter: p.maxIter,
+            colorFn: p.colorFn,
+            // only used for julia set
+            startI: null,
+            startR: null,
 
-        // crude method for sharpening image as we zoom in
-        world.maxIter += 100;
-    }
+            draw: function() {
+                var imgData = this.drawContext.createImageData(this.width, this.height),
+                    x, y, result;
 
-    function resetWorld() {
-        world.minR = -2.5;
-        world.maxR = 1.5;
-        world.minI = -1.5;
-        world.maxI = 1.5;
+                result = this.computeFn(this);
+                imgData.data.set(result);
 
-        world.maxIter = 100;
+                this.drawContext.putImageData(imgData, 0, 0);
+            },
+            update: function(newx1, newy1, newx2, newy2) {
+                var p1 = mandelbrot.xy_to_ri(newx1, newy1, world),
+                    p2 = mandelbrot.xy_to_ri(newx2, newy2, world)
+
+                if (p1.r > p2.r) {
+                    this.maxR = p1.r;
+                    this.minR = p2.r;
+                }
+                else {
+                    this.maxR = p2.r;
+                    this.minR = p1.r;
+                }
+
+                if (p1.i > p2.i) {
+                    this.minI = p2.i;
+                    this.maxI = p1.i;
+                }
+                else {
+                    this.minI = p1.i;
+                    this.maxI = p2.i;
+                }
+
+                // crude method for sharpening image as we zoom in
+                this.maxIter += 100;
+            },
+
+            reset: function() {
+                this.minR = origMinR;
+                this.maxR = origMaxR;
+                this.minI = origMinI;
+                this.maxI = origMaxI;
+
+                this.maxIter = 100;
+            }
+        };
     }
 
     function drawSelectionRect(offsetX, offsetY) {
@@ -179,29 +233,6 @@
         }
     }
 
-    function drawJuliaPreview(offsetX, offsetY) {
-        var imgData, result,
-            startP = mandelbrot.xy_to_ri(offsetX, offsetY, world)
-
-        imgData = overlayCtx.createImageData(previewWorld.width, previewWorld.height);
-        result = mandelbrot.computeJulia(previewWorld, startP.r, startP.i, colors.invert(colors.selected));
-        imgData.data.set(result);
-        overlayCtx.putImageData(imgData, 0, 0);
-    }
-
-    function compute(_w, _ctx, _colorScheme) {
-        var w = _w || world,
-            ctx = _ctx || $('#c')[0].getContext('2d'),
-            colorScheme = _colorScheme || colors.selected,
-            imgData = ctx.createImageData(w.width, w.height),
-            x, y, result;
-
-        result = mandelbrot.compute(w, colorScheme);
-        imgData.data.set(result);
-
-        ctx.putImageData(imgData, 0, 0);
-    }
-
     function drawColorPreviews(invert) {
         var sidebar = $('#sidebar');
 
@@ -211,24 +242,30 @@
         $.each(colors.schemes, function(index, _scheme) {
             var c = $('<canvas class="scheme"></canvas>'),
                 ctx = c[0].getContext('2d'),
-                scheme = invert ? colors.invert(_scheme) : _scheme;
+                scheme = invert ? colors.invert(_scheme) : _scheme,
+                // base these world objects on previewWorld
+                w = Object.create(previewWorld);
 
-            ctx.canvas.width = previewWorld.width;
-            ctx.canvas.height = previewWorld.height;
+            w.computeFn = mandelbrot.compute;
+            w.drawContext = ctx;
+            w.colorFn = scheme;
+
+            ctx.canvas.width = w.width;
+            ctx.canvas.height = w.height;
 
             c.on('click', function(ev) {
                 // change current color scheme on click
-                colors.selected = scheme;
-                compute();
+                world.colorFn = scheme;
+                world.draw();
             });
 
-            compute(previewWorld, ctx, scheme);
+            w.draw();
             sidebar.append(c)
         });
     }
 
 
     // draw the full set
-    compute();
+    world.draw();
     drawColorPreviews();
 })();

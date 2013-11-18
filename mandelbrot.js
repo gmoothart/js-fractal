@@ -4,14 +4,15 @@
 
     // public signature
     window.mandelbrot = {
-        compute: function(world, colorFn) {
+        compute: function(world) {
             return compute(world, function(r,i,maxIter){ return diverges(r,i,0,0,maxIter); },
-                colorFn);
+                world.colorFn);
         },
         // todo: can generate more accurately, cf. wikipedia
-        computeJulia: function(world, startR, startI, colorFn) {
-            return compute(world, function(r,i,maxIter){ return diverges(startR,startI,r,i,maxIter); },
-                colorFn);
+        computeJulia: function(world) {
+            return compute(world,
+                function(r,i,maxIter){ return diverges(world.startR,world.startI,r,i,maxIter); },
+                world.colorFn);
         },
         xy_to_ri: xy_to_ri
     };
